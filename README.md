@@ -94,10 +94,10 @@ It helps understand **what drives insurance charges** and builds a predictive mo
 
 ```bash
 # Clone repo
-git clone https://github.com/your-username/medical-insurance-prediction.git
+git clone https://github.com/Ajay-hb/Medical-Insurance-Prediction.git
 
 # Move into project folder
-cd medical-insurance-prediction
+cd Medical-Insurance-Prediction
 
 # Install dependencies
 pip install -r requirements.txt
