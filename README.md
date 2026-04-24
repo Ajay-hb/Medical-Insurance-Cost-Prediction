@@ -4,7 +4,7 @@
 ![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Regression-green)
 ![Library](https://img.shields.io/badge/Scikit--Learn-Enabled-orange)
 ![Status](https://img.shields.io/badge/Project-Completed-brightgreen)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
+
 
 ---
 
@@ -78,7 +78,7 @@ It helps understand **what drives insurance charges** and builds a predictive mo
 ## 📸 Project Screenshots
 
 ### 🔹 Data Distribution
-![Distribution](images/data_distribution.png)
+![Distribution](images/datadistribution.png)
 
 ### 🔹 Correlation Heatmap
 ![Heatmap](images/heatmap.png)
