@@ -78,7 +78,7 @@ It helps understand **what drives insurance charges** and builds a predictive mo
 ## 📸 Project Screenshots
 
 ### 🔹 Data Distribution
-![Distribution](images/distribution.png)
+![Distribution](images/data_distribution.png)
 
 ### 🔹 Correlation Heatmap
 ![Heatmap](images/heatmap.png)
