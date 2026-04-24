@@ -81,7 +81,7 @@ It helps understand **what drives insurance charges** and builds a predictive mo
 ![Distribution](images/distribution.png)
 
 ### 🔹 Correlation Heatmap
-![Heatmap](images/Screenshot 2026-04-24 115011.png)
+![Heatmap](images/heatmap.png)
 
 ### 🔹 Model Prediction vs Actual
 ![Prediction](images/prediction.png)
