@@ -9,8 +9,8 @@
 </p>
 
 <p align="center">
-  <a href="https://your-streamlit-app-link.streamlit.app">
-    <img src="https://img.shields.io/badge/🚀%20Live%20Demo-Click%20Here-success?style=for-the-badge"/>
+  <a href="https://ajay-medical-insurance-cost-prediction.streamlit.app/" target="_blank">
+    <img src="https://img.shields.io/badge/🚀%20Open%20Live%20App-Click%20Here-success?style=for-the-badge"/>
   </a>
 </p>
 
@@ -23,7 +23,7 @@
 
 ---
 
-## 🎥 Live App Demo
+## 🎥 Live Demo
 
 <p align="center">
   <img src="assets/app.gif" width="85%"/>
@@ -33,13 +33,14 @@
 
 ## 🚀 Overview
 
-The **Medical Insurance Cost Predictor** is a production-ready machine learning application that estimates insurance costs based on personal and lifestyle factors.
+The **Medical Insurance Cost Predictor** is a production-ready machine learning application that estimates insurance costs based on key personal and lifestyle factors.
 
-It provides:
+It transforms predictions into **actionable insights** by providing:
+
 - 📊 Risk classification  
-- 🧠 Key drivers  
+- 🧠 Key cost drivers  
 - 💡 Personalized recommendations  
-- 📄 Downloadable reports  
+- 📄 Downloadable PDF reports  
 
 ---
 
@@ -52,11 +53,11 @@ It provides:
 | RMSE | Optimized |
 | Model Type | Regression |
 
-### 📈 Key Notes
-- Handles non-linear relationships  
-- Trained on structured insurance dataset  
-- Balanced bias-variance tradeoff  
-- Optimized for real-world predictions  
+### 📈 Key Insights
+- Captures non-linear relationships  
+- Trained on real-world structured data  
+- Optimized for stable predictions  
+- Balanced bias vs variance  
 
 ---
 
@@ -74,8 +75,8 @@ It provides:
 ✔ Risk level classification  
 ✔ Smart recommendations  
 ✔ Premium UI dashboard  
-✔ Structured PDF reports  
-✔ Cloud deployment ready  
+✔ Structured PDF reporting  
+✔ Fully deployable (Streamlit Cloud)
 
 ---
 
@@ -94,18 +95,18 @@ It provides:
 ## 🤖 Model
 
 - Built using **Scikit-learn Regression**
-- Learns patterns between health factors and cost
-- Optimized for accuracy and interpretability  
+- Learns relationships between health factors and insurance cost
+- Designed for interpretability and accuracy
 
 ---
 
 ## 💻 How It Works
 
-1. User enters details  
+1. User inputs personal details  
 2. Model predicts insurance cost  
-3. Risk level is evaluated  
+3. System determines risk level  
 4. Recommendations are generated  
-5. Report is created  
+5. PDF report is created  
 
 ---
 
