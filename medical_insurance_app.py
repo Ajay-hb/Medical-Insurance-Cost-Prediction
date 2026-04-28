@@ -1,11 +1,16 @@
 import streamlit as st
 import pandas as pd
 import joblib
-import pdfkit
+import tempfile
 import time
 
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import letter
+
 # ---------------- CONFIG ----------------
-st.set_page_config(page_title="Insurance Predictor", layout="wide")
+st.set_page_config(page_title="Medical Insurance Predictor", layout="wide")
 
 model = joblib.load("model.pkl")
 
@@ -39,7 +44,7 @@ with col3:
 # ---------------- PREDICT ----------------
 if st.button("🚀 Generate Report"):
 
-    with st.spinner("Generating report..."):
+    with st.spinner("Analyzing..."):
         time.sleep(1)
 
     smoker_val = 1 if smoker == "Yes" else 0
@@ -55,133 +60,134 @@ if st.button("🚀 Generate Report"):
 
     prediction = model.predict(X)[0]
 
-    # Risk
+    # ---------------- RISK ----------------
     if smoker == "Yes" or bmi > 30:
         risk = "HIGH RISK"
-        risk_color = "#ff4d4f"
+        risk_color = colors.red
     elif bmi > 25:
         risk = "MEDIUM RISK"
-        risk_color = "#faad14"
+        risk_color = colors.orange
     else:
         risk = "LOW RISK"
-        risk_color = "#52c41a"
+        risk_color = colors.green
 
-    # Suggestions
-    suggestions = []
-    if smoker == "Yes":
-        suggestions.append("Quit smoking to significantly reduce cost")
-    if bmi > 25:
-        suggestions.append("Maintain healthy BMI with exercise")
-    if age > 50:
-        suggestions.append("Regular health checkups recommended")
-
-    if not suggestions:
-        suggestions.append("No changes required — healthy profile")
-
-    # Key factors
+    # ---------------- FACTORS ----------------
     factors = []
     if smoker == "Yes":
-        factors.append("Smoking increases cost significantly")
+        factors.append("🚬 Smoking increases cost significantly")
     if bmi > 25:
-        factors.append("Higher BMI increases risk")
+        factors.append("⚖️ Higher BMI increases health risk")
     if age > 50:
-        factors.append("Age contributes to higher cost")
+        factors.append("🧓 Age contributes to higher cost")
 
-    # ---------------- HTML REPORT ----------------
-    html = f"""
-    <html>
-    <head>
-    <style>
+    if not factors:
+        factors.append("✅ No major risk factors")
 
-    body {{
-        font-family: Arial;
-        background: #f5f7fb;
-        padding: 20px;
-    }}
+    # ---------------- SUGGESTIONS ----------------
+    suggestions = []
+    if smoker == "Yes":
+        suggestions.append("🚭 Quit smoking to reduce premium")
+    if bmi > 25:
+        suggestions.append("🥗 Maintain healthy BMI")
+    if age > 50:
+        suggestions.append("🧑‍⚕️ Regular health checkups")
 
-    .header {{
-        background: linear-gradient(90deg,#0f2027,#2c5364);
-        color: white;
-        padding: 20px;
-        border-radius: 12px;
-    }}
+    if not suggestions:
+        suggestions.append("✅ No changes required — healthy profile")
 
-    .card {{
-        background: white;
-        padding: 15px;
-        border-radius: 12px;
-        margin-top: 15px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }}
+    # ---------------- SHOW UI ----------------
+    st.success(f"💰 Estimated Cost: ₹{prediction:,.0f}")
+    st.info(f"⚠️ Risk Level: {risk}")
 
-    .row {{
-        display: flex;
-        justify-content: space-between;
-    }}
+    # ---------------- PDF ----------------
+    st.markdown("### 📄 Download Premium Report")
 
-    .badge {{
-        padding: 6px 12px;
-        border-radius: 8px;
-        color: white;
-        background: {risk_color};
-        font-weight: bold;
-    }}
+    tmp_pdf = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
 
-    ul {{
-        padding-left: 20px;
-    }}
+    doc = SimpleDocTemplate(tmp_pdf.name, pagesize=letter)
+    styles = getSampleStyleSheet()
 
-    </style>
-    </head>
+    content = []
 
-    <body>
+    # HEADER BAR
+    header_table = Table([
+        ["🏥 Medical Insurance Cost Predictor"]
+    ])
+    header_table.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,-1), colors.darkblue),
+        ("TEXTCOLOR", (0,0), (-1,-1), colors.white),
+        ("ALIGN", (0,0), (-1,-1), "CENTER"),
+        ("FONTSIZE", (0,0), (-1,-1), 16),
+        ("BOTTOMPADDING", (0,0), (-1,-1), 10),
+    ]))
+    content.append(header_table)
+    content.append(Spacer(1, 15))
 
-    <div class="header">
-        <h2>Medical Insurance Cost Predictor</h2>
-        <p>Smart Insights. Better Decisions.</p>
-    </div>
+    # SUMMARY BOX
+    summary_table = Table([
+        ["📊 Estimated Cost", f"₹{prediction:,.0f}"],
+        ["⚠️ Risk Level", risk]
+    ], colWidths=[200, 200])
 
-    <div class="card">
-        <h3>Customer Profile</h3>
-        <p><b>Age:</b> {age} &nbsp; | 
-           <b>BMI:</b> {bmi} &nbsp; | 
-           <b>Children:</b> {children} &nbsp; | 
-           <b>Smoker:</b> {smoker} &nbsp; | 
-           <b>Gender:</b> {sex}
-        </p>
-    </div>
+    summary_table.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,-1), colors.lightgrey),
+        ("GRID", (0,0), (-1,-1), 1, colors.black),
+        ("TEXTCOLOR", (1,1), (1,1), risk_color),
+    ]))
 
-    <div class="card">
-        <h3>Estimated Insurance Cost</h3>
-        <h2>₹{prediction:,.0f}</h2>
-        <p>Risk Level: <span class="badge">{risk}</span></p>
-    </div>
+    content.append(summary_table)
+    content.append(Spacer(1, 20))
 
-    <div class="card">
-        <h3>Key Drivers</h3>
-        <ul>
-        {''.join([f"<li>{f}</li>" for f in factors])}
-        </ul>
-    </div>
+    # PROFILE TABLE
+    profile_data = [
+        ["📋 Feature", "Value"],
+        ["👤 Age", age],
+        ["⚖️ BMI", bmi],
+        ["👨‍👩‍👧 Children", children],
+        ["🚬 Smoker", smoker],
+        ["🧑 Gender", sex],
+    ]
 
-    <div class="card">
-        <h3>Personalized Suggestions</h3>
-        <ul>
-        {''.join([f"<li>{s}</li>" for s in suggestions])}
-        </ul>
-    </div>
+    profile_table = Table(profile_data, colWidths=[200, 200])
+    profile_table.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,0), colors.grey),
+        ("TEXTCOLOR",(0,0),(-1,0),colors.white),
+        ("GRID", (0,0), (-1,-1), 1, colors.black),
+    ]))
 
-    </body>
-    </html>
-    """
+    content.append(profile_table)
+    content.append(Spacer(1, 20))
 
-    # Save HTML
-    with open("report.html", "w") as f:
-        f.write(html)
+    # KEY DRIVERS
+    driver_data = [["🔍 Key Drivers"]]
+    for f in factors:
+        driver_data.append([f])
 
-    # Convert to PDF
-    pdfkit.from_file("report.html", "final_report.pdf")
+    driver_table = Table(driver_data, colWidths=[400])
+    driver_table.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,0), colors.grey),
+        ("TEXTCOLOR",(0,0),(-1,0),colors.white),
+        ("GRID", (0,0), (-1,-1), 1, colors.black),
+    ]))
 
-    # Download
-    with open("final_report.pdf", "rb") as f:
-        st.download_button("📥 Download Report", f, "Medical_Insurance_Report.pdf")
+    content.append(driver_table)
+    content.append(Spacer(1, 20))
+
+    # SUGGESTIONS
+    suggest_data = [["🧠 Recommendations"]]
+    for s in suggestions:
+        suggest_data.append([s])
+
+    suggest_table = Table(suggest_data, colWidths=[400])
+    suggest_table.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,0), colors.grey),
+        ("TEXTCOLOR",(0,0),(-1,0),colors.white),
+        ("GRID", (0,0), (-1,-1), 1, colors.black),
+    ]))
+
+    content.append(suggest_table)
+
+    doc.build(content)
+
+    with open(tmp_pdf.name, "rb") as f:
+        st.download_button("📥 Download Premium Report", f, "insurance_report.pdf")
