@@ -2,43 +2,43 @@ import streamlit as st
 import pandas as pd
 import joblib
 import plotly.express as px
+import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import tempfile
 
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.pagesizes import letter
-from reportlab.lib import colors
 
 # ---------------- CONFIG ----------------
-st.set_page_config(page_title="Insurance Cost Intelligence System", layout="wide")
+st.set_page_config(page_title="Insurance Intelligence Dashboard", layout="wide")
 
 # ---------------- LOAD ----------------
 model = joblib.load("model.pkl")
 
 # ---------------- HEADER ----------------
 st.markdown("""
-<h1 style='text-align: center;'>🏥 Insurance Cost Intelligence System</h1>
+<h1 style='text-align: center;'>🏥 Insurance Cost Intelligence Dashboard</h1>
 <p style='text-align: center;'>💰 Predict • Analyze • Optimize</p>
 """, unsafe_allow_html=True)
 
 # ---------------- SIDEBAR ----------------
 st.sidebar.title("📊 Navigation")
-page = st.sidebar.radio("Go to", ["Prediction", "What-If Simulator", "Dataset"])
+page = st.sidebar.radio("Go to", ["Dashboard", "Simulator", "Dataset"])
 
-# ===================== PREDICTION =====================
-if page == "Prediction":
+# ===================== DASHBOARD =====================
+if page == "Dashboard":
 
-    st.subheader("📊 Enter Customer Details")
+    st.markdown("## 📊 Customer Input Panel")
 
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        age = st.number_input("Age", min_value=18, max_value=65, value=30)
-        bmi = st.number_input("BMI", min_value=10.0, max_value=50.0, value=25.0)
+        age = st.number_input("Age", 18, 65, 30)
+        bmi = st.number_input("BMI", 10.0, 50.0, 25.0)
 
     with col2:
-        children = st.number_input("Number of Children", min_value=0, max_value=5, value=1)
+        children = st.number_input("Children", 0, 5, 1)
         smoker = st.selectbox("Smoker", ["Yes", "No"])
 
     with col3:
@@ -48,169 +48,152 @@ if page == "Prediction":
     sex_val = 1 if sex == "Male" else 0
 
     input_data = pd.DataFrame({
-        "age": [age],
-        "bmi": [bmi],
-        "children": [children],
-        "smoker": [smoker_val],
-        "sex": [sex_val]
+        "age":[age],
+        "bmi":[bmi],
+        "children":[children],
+        "smoker":[smoker_val],
+        "sex":[sex_val]
     })
 
-    if st.button("💰 Predict Cost"):
+    prediction = model.predict(input_data)[0]
 
-        prediction = model.predict(input_data)[0]
+    # ---------------- KPI CARDS ----------------
+    st.markdown("### 💼 Key Metrics")
 
-        st.success(f"💵 Estimated Cost: ₹{prediction:,.0f}")
+    k1, k2, k3 = st.columns(3)
 
-        # ---------------- SUGGESTIONS ----------------
-        st.subheader("📊 Suggestions to Reduce Cost")
+    with k1:
+        st.metric("💰 Estimated Cost", f"₹{prediction:,.0f}")
 
-        suggestions = []
+    with k2:
+        risk = "Low"
+        if smoker == "Yes" or bmi > 30:
+            risk = "High"
+        elif bmi > 25:
+            risk = "Medium"
 
-        if smoker == "Yes":
-            suggestions.append("Quit smoking")
-        if bmi > 25:
-            suggestions.append("Reduce BMI (exercise & diet)")
-        if age > 50:
-            suggestions.append("Regular health checkups")
+        st.metric("⚠️ Risk Level", risk)
 
-        if suggestions:
-            for s in suggestions:
-                st.write("•", s)
+    with k3:
+        if bmi < 25:
+            health = "Good"
         else:
-            st.success("Healthy profile — optimized cost")
+            health = "Needs Attention"
 
-        # ---------------- CHART ----------------
-        fig = px.bar(x=["Cost"], y=[prediction], title="Predicted Cost")
-        st.plotly_chart(fig, use_container_width=True)
+        st.metric("🏃 Health Status", health)
 
-        # ---------------- PDF ----------------
-        st.markdown("### 📄 Download Report")
+    # ---------------- INTERACTIVE DASHBOARD ----------------
+    st.markdown("---")
+    st.markdown("## 📊 Live Analytics Dashboard")
 
-        fig2, ax = plt.subplots()
-        ax.bar(["Cost"], [prediction])
-        ax.set_title("Insurance Cost")
+    col4, col5 = st.columns(2)
 
-        tmp_chart = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
-        plt.savefig(tmp_chart.name)
-        plt.close()
+    # BMI Gauge
+    with col4:
+        fig_gauge = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=bmi,
+            title={'text': "BMI Level"},
+            gauge={'axis': {'range': [0, 50]}}
+        ))
+        st.plotly_chart(fig_gauge, use_container_width=True)
 
-        tmp_pdf = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+    # Cost Bar
+    with col5:
+        fig_cost = px.bar(
+            x=["Estimated Cost"],
+            y=[prediction],
+            title="💰 Cost Estimate"
+        )
+        st.plotly_chart(fig_cost, use_container_width=True)
 
-        doc = SimpleDocTemplate(tmp_pdf.name, pagesize=letter)
-        styles = getSampleStyleSheet()
+    # ---------------- COMPARISON ----------------
+    st.markdown("### 📈 Impact Analysis")
 
-        content = []
+    baseline = pd.DataFrame({
+        "age":[age],
+        "bmi":[25],
+        "children":[children],
+        "smoker":[0],
+        "sex":[sex_val]
+    })
 
-        content.append(Paragraph("Medical Insurance Report", styles['Title']))
-        content.append(Spacer(1, 10))
+    baseline_cost = model.predict(baseline)[0]
 
-        content.append(Paragraph(f"Age: {age}", styles['Normal']))
-        content.append(Paragraph(f"BMI: {bmi}", styles['Normal']))
-        content.append(Paragraph(f"Children: {children}", styles['Normal']))
-        content.append(Paragraph(f"Smoker: {smoker}", styles['Normal']))
+    fig_compare = px.bar(
+        x=["Your Profile", "Optimized Profile"],
+        y=[prediction, baseline_cost],
+        title="Optimization Potential"
+    )
 
-        content.append(Spacer(1, 10))
-        content.append(Paragraph(f"Predicted Cost: ₹{prediction:,.0f}", styles['Heading2']))
+    st.plotly_chart(fig_compare, use_container_width=True)
 
-        content.append(Spacer(1, 10))
-        content.append(Paragraph("Suggestions:", styles['Heading3']))
+    # ---------------- PDF ----------------
+    st.markdown("### 📄 Download Report")
 
-        if suggestions:
-            for s in suggestions:
-                content.append(Paragraph(f"• {s}", styles['Normal']))
-        else:
-            content.append(Paragraph("No improvements needed", styles['Normal']))
+    fig, ax = plt.subplots()
+    ax.bar(["Cost"], [prediction])
 
-        content.append(Spacer(1, 15))
-        content.append(Image(tmp_chart.name, width=400, height=250))
+    tmp_chart = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+    plt.savefig(tmp_chart.name)
+    plt.close()
 
-        doc.build(content)
+    tmp_pdf = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
 
-        with open(tmp_pdf.name, "rb") as f:
-            st.download_button("📥 Download PDF", f, "report.pdf")
+    doc = SimpleDocTemplate(tmp_pdf.name, pagesize=letter)
+    styles = getSampleStyleSheet()
 
-# ===================== WHAT-IF =====================
-elif page == "What-If Simulator":
+    content = [
+        Paragraph("Insurance Report", styles['Title']),
+        Spacer(1, 10),
+        Paragraph(f"Cost: ₹{prediction:,.0f}", styles['Normal']),
+        Spacer(1, 10),
+        Image(tmp_chart.name, width=400, height=250)
+    ]
 
-    st.title("🎯 Cost Optimization Simulator")
+    doc.build(content)
 
-    st.markdown("### Compare current vs improved lifestyle")
+    with open(tmp_pdf.name, "rb") as f:
+        st.download_button("📥 Download PDF", f, "report.pdf")
+
+# ===================== SIMULATOR =====================
+elif page == "Simulator":
+
+    st.title("🎯 What-If Simulator")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("Current Profile")
-        age = st.number_input("Age", 18, 65, 30)
-        bmi_current = st.number_input("Current BMI", 10.0, 50.0, 30.0)
-        smoker_current = st.selectbox("Smoker (Current)", ["Yes", "No"])
-        children = st.number_input("Children", 0, 5, 1)
-        sex = st.selectbox("Gender", ["Male", "Female"])
-
+        bmi_old = st.number_input("Current BMI", 10.0, 50.0, 30.0)
     with col2:
-        st.subheader("Improved Profile")
         bmi_new = st.number_input("Improved BMI", 10.0, 50.0, 25.0)
-        smoker_new = st.selectbox("Smoker (Improved)", ["Yes", "No"])
 
-    # Encoding
-    def encode(smoker, sex):
-        return (
-            1 if smoker == "Yes" else 0,
-            1 if sex == "Male" else 0
-        )
+    data_old = pd.DataFrame({"age":[30],"bmi":[bmi_old],"children":[1],"smoker":[1],"sex":[1]})
+    data_new = pd.DataFrame({"age":[30],"bmi":[bmi_new],"children":[1],"smoker":[0],"sex":[1]})
 
-    smk_c, sex_val = encode(smoker_current, sex)
-    smk_n, _ = encode(smoker_new, sex)
+    cost_old = model.predict(data_old)[0]
+    cost_new = model.predict(data_new)[0]
 
-    current = pd.DataFrame({
-        "age":[age],"bmi":[bmi_current],"children":[children],"smoker":[smk_c],"sex":[sex_val]
-    })
-
-    improved = pd.DataFrame({
-        "age":[age],"bmi":[bmi_new],"children":[children],"smoker":[smk_n],"sex":[sex_val]
-    })
-
-    cost_current = model.predict(current)[0]
-    cost_new = model.predict(improved)[0]
-
-    st.subheader("📊 Cost Comparison")
-
-    fig = px.bar(
-        x=["Current", "Improved"],
-        y=[cost_current, cost_new],
-        title="Cost Impact Analysis"
-    )
-
+    fig = px.bar(x=["Current","Improved"], y=[cost_old, cost_new])
     st.plotly_chart(fig, use_container_width=True)
 
-    savings = cost_current - cost_new
-
-    if savings > 0:
-        st.success(f"💰 You can save ₹{savings:,.0f}")
-    else:
-        st.warning("No cost improvement detected")
+    st.success(f"💰 Savings: ₹{(cost_old-cost_new):,.0f}")
 
 # ===================== DATASET =====================
 elif page == "Dataset":
 
-    st.title("📂 Dataset Explorer")
+    st.title("📂 Dataset")
 
     df = pd.read_csv("medical_insurance.csv")
 
-    st.subheader("📊 Dataset Overview")
-    st.write("Shape:", df.shape)
-
-    st.subheader("🔍 Full Dataset")
     st.dataframe(df)
 
-    st.subheader("📈 Summary")
-    st.write(df.describe())
-
     st.download_button(
-        "📥 Download Dataset",
+        "Download CSV",
         df.to_csv(index=False),
-        file_name="insurance_dataset.csv"
+        "dataset.csv"
     )
 
 # ---------------- FOOTER ----------------
 st.markdown("---")
-st.caption("Built using Machine Learning & Streamlit")
+st.caption("Built using ML + Streamlit")
