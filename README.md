@@ -1,12 +1,13 @@
-<p align="center">
-  <img width="1572" height="634" alt="image" src="https://github.com/user-attachments/assets/da3ce92d-1f9e-45de-9550-6ebee5e8a7c7" />
 
-</p>
 
 <h1 align="center">🏥 Medical Insurance Cost Predictor</h1>
 
 <p align="center">
   <b>Smart Insights • Better Decisions</b>
+</p>
+<p align="center">
+  <img width="1572" height="634" alt="image" src="https://github.com/user-attachments/assets/da3ce92d-1f9e-45de-9550-6ebee5e8a7c7" />
+
 </p>
 
 <p align="center">
@@ -58,7 +59,8 @@ It transforms predictions into **actionable insights** by providing:
 ## 📸 Application Preview
 
 <p align="center">
-  <img src="assets/report.png" width="85%"/>
+  <<img width="1824" height="654" alt="image" src="https://github.com/user-attachments/assets/7ff056b8-541b-4155-8aeb-625ee4e28fde" />
+
 </p>
 
 ---
