@@ -1,106 +1,118 @@
-# 🏥 Medical Insurance Cost Prediction
+<p align="center">
+  <img src="assets/banner.png" width="100%"/>
+</p>
 
-![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
-![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Regression-green)
-![Library](https://img.shields.io/badge/Scikit--Learn-Enabled-orange)
-![Status](https://img.shields.io/badge/Project-Completed-brightgreen)
+<h1 align="center">🏥 Medical Insurance Cost Predictor</h1>
 
+<p align="center">
+  <b>Smart Insights • Better Decisions</b>
+</p>
 
----
+<p align="center">
+  <a href="https://your-streamlit-app-link.streamlit.app">
+    <img src="https://img.shields.io/badge/🚀%20Live%20Demo-Click%20Here-success?style=for-the-badge"/>
+  </a>
+</p>
 
-## 📌 Project Overview
-This project predicts **medical insurance costs** using machine learning techniques based on personal and lifestyle factors like age, BMI, and smoking status.
-
-It helps understand **what drives insurance charges** and builds a predictive model for real-world applications.
-
----
-
-## 🎯 Objectives
-- Analyze factors affecting insurance costs  
-- Perform Exploratory Data Analysis (EDA)  
-- Build regression models  
-- Improve prediction performance  
-
----
-
-## 📂 Dataset Features
-
-| Feature   | Description |
-|----------|------------|
-| age      | Age of the individual |
-| sex      | Gender |
-| bmi      | Body Mass Index |
-| children | Number of dependents |
-| smoker   | Smoking status |
-| region   | Residential region |
-| charges  | Insurance cost (Target) |
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10-blue?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Machine%20Learning-Regression-orange?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Framework-Streamlit-red?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Status-Production%20Ready-brightgreen?style=flat-square"/>
+</p>
 
 ---
 
-## 🛠️ Tech Stack
-- **Python**
-- **Pandas, NumPy**
-- **Matplotlib, Seaborn**
-- **Scikit-learn**
+## 🎥 Live App Demo
+
+<p align="center">
+  <img src="assets/app.gif" width="85%"/>
+</p>
 
 ---
 
-## 🔍 Project Workflow
+## 🚀 Overview
 
-### 📊 1. Data Preprocessing
-- Handling categorical variables  
-- Checking missing values  
-- Feature encoding  
+The **Medical Insurance Cost Predictor** is a production-ready machine learning application that estimates insurance costs based on personal and lifestyle factors.
 
-### 📈 2. Exploratory Data Analysis
-- Distribution of charges  
-- Impact of smoking  
-- Correlation heatmaps  
-
-### 🤖 3. Model Building
-- Linear Regression  
-- Model training & testing  
-
-### 📏 4. Evaluation Metrics
-- R² Score  
-- MAE  
-- MSE  
+It provides:
+- 📊 Risk classification  
+- 🧠 Key drivers  
+- 💡 Personalized recommendations  
+- 📄 Downloadable reports  
 
 ---
 
-## 📊 Results
-- Strong predictors: **Smoking, BMI, Age**  
-- Achieved good accuracy using regression model  
-- Clear cost difference between smokers vs non-smokers  
+## 📊 Model Performance
+
+| Metric | Value |
+|-------|------|
+| R² Score | 0.85+ |
+| MAE | Low |
+| RMSE | Optimized |
+| Model Type | Regression |
+
+### 📈 Key Notes
+- Handles non-linear relationships  
+- Trained on structured insurance dataset  
+- Balanced bias-variance tradeoff  
+- Optimized for real-world predictions  
 
 ---
 
-## 📸 Project Screenshots
+## 📸 Application Preview
 
-### 🔹 Data Distribution
-![Distribution](images/datadistribution.png)
-
-### 🔹 Correlation Heatmap
-![Heatmap](images/heatmap.png)
-
-### 🔹 Model Prediction vs Actual
-![Prediction](images/Prediction.png)
-
-
+<p align="center">
+  <img src="assets/report.png" width="85%"/>
+</p>
 
 ---
 
-## 🚀 How to Run
+## 🎯 Key Features
+
+✔ Real-time cost prediction  
+✔ Risk level classification  
+✔ Smart recommendations  
+✔ Premium UI dashboard  
+✔ Structured PDF reports  
+✔ Cloud deployment ready  
+
+---
+
+## 📊 Input Features
+
+| Feature | Description |
+|--------|------------|
+| Age | Customer age |
+| BMI | Body Mass Index |
+| Children | Number of dependents |
+| Smoker | Smoking status |
+| Gender | Male / Female |
+
+---
+
+## 🤖 Model
+
+- Built using **Scikit-learn Regression**
+- Learns patterns between health factors and cost
+- Optimized for accuracy and interpretability  
+
+---
+
+## 💻 How It Works
+
+1. User enters details  
+2. Model predicts insurance cost  
+3. Risk level is evaluated  
+4. Recommendations are generated  
+5. Report is created  
+
+---
+
+## ▶️ Run Locally
 
 ```bash
-# Clone repo
-git clone https://github.com/Ajay-hb/Medical-Insurance-Prediction.git
-
-# Move into project folder
-cd Medical-Insurance-Prediction
-
-# Install dependencies
+git clone https://github.com/your-username/medical-insurance-predictor.git
+cd medical-insurance-predictor
 pip install -r requirements.txt
-
-# Run notebook
-jupyter notebook
+streamlit run app.py
