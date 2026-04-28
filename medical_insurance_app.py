@@ -11,11 +11,11 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.pagesizes import letter
 
 # ---------------- CONFIG ----------------
-st.set_page_config(page_title=" Mediacl Insurance Price Detector ", layout="wide")
+st.set_page_config(page_title="Insurance AI Dashboard", layout="wide")
 
 model = joblib.load("model.pkl")
 
-# Dummy background data (IMPORTANT for SHAP)
+# Background for SHAP
 background = pd.DataFrame({
     "age":[30,40,50],
     "bmi":[20,25,30],
@@ -24,38 +24,75 @@ background = pd.DataFrame({
     "sex":[0,1,0]
 })
 
-# ---------------- CSS ----------------
+# ---------------- PREMIUM CSS ----------------
 st.markdown("""
 <style>
+
+/* HEADER */
 .header {
     text-align:center;
-    font-size:42px;
+    font-size:40px;
     font-weight:bold;
     background: linear-gradient(90deg,#00c6ff,#0072ff);
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
+    animation: glow 2s infinite alternate;
 }
+@keyframes glow {
+    from {text-shadow:0 0 10px #00c6ff;}
+    to {text-shadow:0 0 25px #0072ff;}
+}
+
+/* CARD */
 .card {
     background: linear-gradient(135deg,#1f4037,#2c5364);
     padding:20px;
     border-radius:15px;
     color:white;
+    margin-bottom:15px;
+    transition:0.4s;
 }
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow:0 0 25px rgba(0,200,255,0.6);
+}
+
+/* FADE */
+.fade {
+    animation: fadeIn 0.8s ease-in;
+}
+@keyframes fadeIn {
+    from {opacity:0; transform:translateY(10px);}
+    to {opacity:1;}
+}
+
+/* SUGGESTION */
 .suggest {
-    padding:10px;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:10px;
     background: rgba(255,77,79,0.1);
-    border-left:5px solid red;
-    margin-bottom:8px;
+    border-left:5px solid #ff4d4f;
 }
 .good {
     background: rgba(82,196,26,0.1);
-    border-left:5px solid green;
+    border-left:5px solid #52c41a;
 }
+
+/* SHAP BOX */
+.shap-box {
+    background:#111;
+    padding:15px;
+    border-radius:12px;
+    margin-top:10px;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------- HEADER ----------------
-st.markdown('<div class="header"> Mediacl Insurance Price Detector</div>', unsafe_allow_html=True)
+st.markdown('<div class="header">🧠 Insurance AI Dashboard</div>', unsafe_allow_html=True)
+st.markdown("<p style='text-align:center'>Explainable AI • Insights • Optimization</p>", unsafe_allow_html=True)
 
 # ---------------- INPUT ----------------
 st.subheader("📊 Enter Details")
@@ -75,7 +112,7 @@ with col3:
 
 if st.button("🚀 Predict"):
 
-    with st.spinner("Analyzing..."):
+    with st.spinner("Running AI analysis..."):
         time.sleep(1)
 
     smoker_val = 1 if smoker == "Yes" else 0
@@ -91,10 +128,23 @@ if st.button("🚀 Predict"):
 
     prediction = model.predict(X)[0]
 
-    st.success(f"💰 Estimated Cost: ₹{prediction:,.0f}")
+    # ---------------- PROFILE ----------------
+    st.markdown("### 📋 Customer Profile")
+    st.markdown(f"""
+    <div class="card fade">
+    👤 Age: {age} | ⚖️ BMI: {bmi} | 👨‍👩‍👧 Children: {children} | 🚬 Smoker: {smoker} | 🧑 Gender: {sex}
+    </div>
+    """, unsafe_allow_html=True)
 
-    # ---------------- SHAP EXPLANATION ----------------
-    st.markdown("### 🧠 Why is this cost predicted?")
+    # ---------------- COST ----------------
+    st.markdown(f"""
+    <div class="card fade">
+    💰 Estimated Cost: <h2>₹{prediction:,.0f}</h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ---------------- SHAP ----------------
+    st.markdown("### 🧠 Why is the cost high?")
 
     try:
         explainer = shap.TreeExplainer(model)
@@ -103,23 +153,29 @@ if st.button("🚀 Predict"):
 
     shap_values = explainer(X)
 
-    # Plot SHAP
+    st.markdown('<div class="shap-box fade">', unsafe_allow_html=True)
+
     fig, ax = plt.subplots()
     shap.plots.bar(shap_values[0], show=False)
     st.pyplot(fig)
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
     # ---------------- TEXT EXPLANATION ----------------
     st.markdown("### 🔍 Key Drivers")
 
     contributions = dict(zip(X.columns, shap_values.values[0]))
-
     sorted_features = sorted(contributions.items(), key=lambda x: abs(x[1]), reverse=True)
 
-    for feature, value in sorted_features:
-        if value > 0:
-            st.write(f"🔺 {feature} is increasing cost")
+    explanations = []
+
+    for f, v in sorted_features:
+        if v > 0:
+            text = f"{f} is increasing cost"
         else:
-            st.write(f"🔻 {feature} is reducing cost")
+            text = f"{f} is reducing cost"
+        explanations.append(text)
+        st.write("•", text)
 
     # ---------------- SUGGESTIONS ----------------
     st.markdown("### 🧠 Suggestions")
@@ -127,17 +183,17 @@ if st.button("🚀 Predict"):
     suggestions = []
 
     if smoker == "Yes":
-        suggestions.append("Quit smoking")
+        suggestions.append("Quit smoking to reduce cost")
     if bmi > 25:
         suggestions.append("Reduce BMI")
     if age > 50:
-        suggestions.append("Health monitoring")
+        suggestions.append("Regular health checkups")
 
     if suggestions:
         for s in suggestions:
-            st.markdown(f'<div class="suggest">{s}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="suggest fade">{s}</div>', unsafe_allow_html=True)
     else:
-        st.markdown('<div class="suggest good">No suggestions needed</div>', unsafe_allow_html=True)
+        st.markdown('<div class="suggest good fade">No suggestions required</div>', unsafe_allow_html=True)
 
     # ---------------- PDF ----------------
     st.markdown("### 📄 Download Report")
@@ -152,14 +208,17 @@ if st.button("🚀 Predict"):
     content.append(Paragraph("Insurance AI Report", styles['Title']))
     content.append(Spacer(1,10))
 
-    content.append(Paragraph(f"Cost: ₹{prediction:,.0f}", styles['Heading2']))
+    content.append(Paragraph("Customer Profile", styles['Heading2']))
+    content.append(Paragraph(str(X.to_dict()), styles['Normal']))
+
+    content.append(Spacer(1,10))
+    content.append(Paragraph(f"Estimated Cost: ₹{prediction:,.0f}", styles['Heading2']))
 
     content.append(Spacer(1,10))
     content.append(Paragraph("Key Drivers", styles['Heading2']))
 
-    for feature, value in sorted_features:
-        direction = "increase" if value > 0 else "reduce"
-        content.append(Paragraph(f"{feature} {direction} cost", styles['Normal']))
+    for e in explanations:
+        content.append(Paragraph(e, styles['Normal']))
 
     content.append(Spacer(1,10))
     content.append(Paragraph("Suggestions", styles['Heading2']))
@@ -173,4 +232,4 @@ if st.button("🚀 Predict"):
     doc.build(content)
 
     with open(tmp_pdf.name, "rb") as f:
-        st.download_button("Download PDF", f, "report.pdf")
+        st.download_button("Download Report", f, "report.pdf")
