@@ -171,33 +171,78 @@ if st.button("🚀 Generate Report"):
             st.markdown(f'<div class="suggest">{s}</div>', unsafe_allow_html=True)
 
     # ---------------- PDF ----------------
-    st.markdown("### 📄 Download Premium Report")
+st.markdown("### 📄 Download Premium Report")
 
-    tmp_pdf = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
-    doc = SimpleDocTemplate(tmp_pdf.name, pagesize=letter)
-    styles = getSampleStyleSheet()
+tmp_pdf = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+doc = SimpleDocTemplate(tmp_pdf.name, pagesize=letter)
+styles = getSampleStyleSheet()
 
-    content = []
+content = []
 
-    header = Table([["Medical Insurance Cost Predictor"]])
-    header.setStyle(TableStyle([
-        ("BACKGROUND", (0,0), (-1,-1), colors.darkblue),
-        ("TEXTCOLOR", (0,0), (-1,-1), colors.white),
-        ("ALIGN", (0,0), (-1,-1), "CENTER"),
-    ]))
+# HEADER
+header = Table([["Medical Insurance Cost Predictor"]])
+header.setStyle(TableStyle([
+    ("BACKGROUND", (0,0), (-1,-1), colors.darkblue),
+    ("TEXTCOLOR", (0,0), (-1,-1), colors.white),
+    ("ALIGN", (0,0), (-1,-1), "CENTER"),
+    ("FONTSIZE", (0,0), (-1,-1), 16),
+    ("BOTTOMPADDING", (0,0), (-1,-1), 10),
+]))
+content.append(header)
+content.append(Spacer(1,15))
 
-    content.append(header)
-    content.append(Spacer(1,15))
+# ---------------- CUSTOMER PROFILE ----------------
+content.append(Paragraph("Customer Profile", styles['Heading2']))
+content.append(Spacer(1,10))
 
-    content.append(Paragraph(f"Estimated Cost: ₹{prediction:,.0f}", styles['Heading2']))
-    content.append(Paragraph(f"Risk Level: {risk}", styles['Normal']))
-    content.append(Spacer(1,10))
+profile_data = [
+    ["Feature", "Value"],
+    ["Age", age],
+    ["BMI", bmi],
+    ["Children", children],
+    ["Smoker", smoker],
+    ["Gender", sex],
+]
 
-    content.append(Paragraph("Recommendations", styles['Heading2']))
-    for s in suggestions:
-        content.append(Paragraph(s, styles['Normal']))
+profile_table = Table(profile_data, colWidths=[200, 200])
 
-    doc.build(content)
+profile_table.setStyle(TableStyle([
+    ("BACKGROUND", (0,0), (-1,0), colors.grey),
+    ("TEXTCOLOR",(0,0),(-1,0),colors.white),
+    ("GRID", (0,0), (-1,-1), 1, colors.black),
+]))
 
-    with open(tmp_pdf.name, "rb") as f:
-        st.download_button("📥 Download Report", f, "insurance_report.pdf")
+content.append(profile_table)
+content.append(Spacer(1,20))
+
+# ---------------- COST + RISK ----------------
+content.append(Paragraph("Summary", styles['Heading2']))
+content.append(Spacer(1,10))
+
+summary_data = [
+    ["Estimated Cost", f"₹{prediction:,.0f}"],
+    ["Risk Level", risk],
+]
+
+summary_table = Table(summary_data, colWidths=[200, 200])
+
+summary_table.setStyle(TableStyle([
+    ("BACKGROUND", (0,0), (-1,-1), colors.lightgrey),
+    ("GRID", (0,0), (-1,-1), 1, colors.black),
+]))
+
+content.append(summary_table)
+content.append(Spacer(1,20))
+
+# ---------------- RECOMMENDATIONS ----------------
+content.append(Paragraph("Recommendations", styles['Heading2']))
+content.append(Spacer(1,10))
+
+for s in suggestions:
+    content.append(Paragraph(f"• {s}", styles['Normal']))
+
+# BUILD
+doc.build(content)
+
+with open(tmp_pdf.name, "rb") as f:
+    st.download_button("📥 Download Report", f, "insurance_report.pdf")
