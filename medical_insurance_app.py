@@ -84,7 +84,7 @@ st.markdown("""
 # ---------------- HEADER ----------------
 st.markdown("""
 <div class="header-box">
-    <div class="header-title">🏥 Medical Insurance Cost Predictor</div>
+    <div class="header-title">Medical Insurance Cost Predictor</div>
     <div class="header-sub">Smart Insights • Better Decisions</div>
 </div>
 """, unsafe_allow_html=True)
