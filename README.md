@@ -1,5 +1,6 @@
 <p align="center">
-  <img src="assets/banner.png" width="100%"/>
+  <img width="1572" height="634" alt="image" src="https://github.com/user-attachments/assets/da3ce92d-1f9e-45de-9550-6ebee5e8a7c7" />
+
 </p>
 
 <h1 align="center">🏥 Medical Insurance Cost Predictor</h1>
@@ -21,13 +22,6 @@
   <img src="https://img.shields.io/badge/Status-Production%20Ready-brightgreen?style=flat-square"/>
 </p>
 
----
-
-## 🎥 Live Demo
-
-<p align="center">
-  <img src="assets/app.gif" width="85%"/>
-</p>
 
 ---
 
