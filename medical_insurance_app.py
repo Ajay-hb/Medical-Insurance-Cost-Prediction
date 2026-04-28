@@ -194,7 +194,7 @@ elif page == "Dataset":
 
     st.title("📂 Dataset Explorer")
 
-    df = pd.read_csv("insurance.csv")
+    df = pd.read_csv("medical_insurance.csv")
 
     st.subheader("📊 Dataset Overview")
     st.write("Shape:", df.shape)
