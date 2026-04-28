@@ -1,101 +1,27 @@
 import streamlit as st
 import pandas as pd
 import joblib
-import shap
-import matplotlib.pyplot as plt
-import tempfile
+import pdfkit
 import time
 
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.pagesizes import letter
-
 # ---------------- CONFIG ----------------
-st.set_page_config(page_title="Insurance AI Dashboard", layout="wide")
+st.set_page_config(page_title="Insurance Predictor", layout="wide")
 
 model = joblib.load("model.pkl")
 
-# Background for SHAP
-background = pd.DataFrame({
-    "age":[30,40,50],
-    "bmi":[20,25,30],
-    "children":[0,1,2],
-    "smoker":[0,1,0],
-    "sex":[0,1,0]
-})
-
-# ---------------- PREMIUM CSS ----------------
+# ---------------- HEADER ----------------
 st.markdown("""
-<style>
-
-/* HEADER */
-.header {
-    text-align:center;
-    font-size:40px;
-    font-weight:bold;
-    background: linear-gradient(90deg,#00c6ff,#0072ff);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-    animation: glow 2s infinite alternate;
-}
-@keyframes glow {
-    from {text-shadow:0 0 10px #00c6ff;}
-    to {text-shadow:0 0 25px #0072ff;}
-}
-
-/* CARD */
-.card {
-    background: linear-gradient(135deg,#1f4037,#2c5364);
-    padding:20px;
-    border-radius:15px;
-    color:white;
-    margin-bottom:15px;
-    transition:0.4s;
-}
-.card:hover {
-    transform: translateY(-8px);
-    box-shadow:0 0 25px rgba(0,200,255,0.6);
-}
-
-/* FADE */
-.fade {
-    animation: fadeIn 0.8s ease-in;
-}
-@keyframes fadeIn {
-    from {opacity:0; transform:translateY(10px);}
-    to {opacity:1;}
-}
-
-/* SUGGESTION */
-.suggest {
-    padding:12px;
-    border-radius:8px;
-    margin-bottom:10px;
-    background: rgba(255,77,79,0.1);
-    border-left:5px solid #ff4d4f;
-}
-.good {
-    background: rgba(82,196,26,0.1);
-    border-left:5px solid #52c41a;
-}
-
-/* SHAP BOX */
-.shap-box {
-    background:#111;
-    padding:15px;
-    border-radius:12px;
-    margin-top:10px;
-}
-
-</style>
+<h1 style='text-align:center;
+background: linear-gradient(90deg,#00c6ff,#0072ff);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;'>
+🏥 Medical Insurance Cost Predictor
+</h1>
+<p style='text-align:center'>Smart Insights • Better Decisions</p>
 """, unsafe_allow_html=True)
 
-# ---------------- HEADER ----------------
-st.markdown('<div class="header">🧠 Insurance AI Dashboard</div>', unsafe_allow_html=True)
-st.markdown("<p style='text-align:center'>Explainable AI • Insights • Optimization</p>", unsafe_allow_html=True)
-
 # ---------------- INPUT ----------------
-st.subheader("📊 Enter Details")
+st.subheader("📊 Enter Customer Details")
 
 col1, col2, col3 = st.columns(3)
 
@@ -110,9 +36,10 @@ with col2:
 with col3:
     sex = st.selectbox("Gender", ["Male", "Female"])
 
-if st.button("🚀 Predict"):
+# ---------------- PREDICT ----------------
+if st.button("🚀 Generate Report"):
 
-    with st.spinner("Running AI analysis..."):
+    with st.spinner("Generating report..."):
         time.sleep(1)
 
     smoker_val = 1 if smoker == "Yes" else 0
@@ -128,108 +55,133 @@ if st.button("🚀 Predict"):
 
     prediction = model.predict(X)[0]
 
-    # ---------------- PROFILE ----------------
-    st.markdown("### 📋 Customer Profile")
-    st.markdown(f"""
-    <div class="card fade">
-    👤 Age: {age} | ⚖️ BMI: {bmi} | 👨‍👩‍👧 Children: {children} | 🚬 Smoker: {smoker} | 🧑 Gender: {sex}
-    </div>
-    """, unsafe_allow_html=True)
+    # Risk
+    if smoker == "Yes" or bmi > 30:
+        risk = "HIGH RISK"
+        risk_color = "#ff4d4f"
+    elif bmi > 25:
+        risk = "MEDIUM RISK"
+        risk_color = "#faad14"
+    else:
+        risk = "LOW RISK"
+        risk_color = "#52c41a"
 
-    # ---------------- COST ----------------
-    st.markdown(f"""
-    <div class="card fade">
-    💰 Estimated Cost: <h2>₹{prediction:,.0f}</h2>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # ---------------- SHAP ----------------
-    st.markdown("### 🧠 Why is the cost high?")
-
-    try:
-        explainer = shap.TreeExplainer(model)
-    except:
-        explainer = shap.KernelExplainer(model.predict, background)
-
-    shap_values = explainer(X)
-
-    st.markdown('<div class="shap-box fade">', unsafe_allow_html=True)
-
-    fig, ax = plt.subplots()
-    shap.plots.bar(shap_values[0], show=False)
-    st.pyplot(fig)
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # ---------------- TEXT EXPLANATION ----------------
-    st.markdown("### 🔍 Key Drivers")
-
-    contributions = dict(zip(X.columns, shap_values.values[0]))
-    sorted_features = sorted(contributions.items(), key=lambda x: abs(x[1]), reverse=True)
-
-    explanations = []
-
-    for f, v in sorted_features:
-        if v > 0:
-            text = f"{f} is increasing cost"
-        else:
-            text = f"{f} is reducing cost"
-        explanations.append(text)
-        st.write("•", text)
-
-    # ---------------- SUGGESTIONS ----------------
-    st.markdown("### 🧠 Suggestions")
-
+    # Suggestions
     suggestions = []
-
     if smoker == "Yes":
-        suggestions.append("Quit smoking to reduce cost")
+        suggestions.append("Quit smoking to significantly reduce cost")
     if bmi > 25:
-        suggestions.append("Reduce BMI")
+        suggestions.append("Maintain healthy BMI with exercise")
     if age > 50:
-        suggestions.append("Regular health checkups")
+        suggestions.append("Regular health checkups recommended")
 
-    if suggestions:
-        for s in suggestions:
-            st.markdown(f'<div class="suggest fade">{s}</div>', unsafe_allow_html=True)
-    else:
-        st.markdown('<div class="suggest good fade">No suggestions required</div>', unsafe_allow_html=True)
+    if not suggestions:
+        suggestions.append("No changes required — healthy profile")
 
-    # ---------------- PDF ----------------
-    st.markdown("### 📄 Download Report")
+    # Key factors
+    factors = []
+    if smoker == "Yes":
+        factors.append("Smoking increases cost significantly")
+    if bmi > 25:
+        factors.append("Higher BMI increases risk")
+    if age > 50:
+        factors.append("Age contributes to higher cost")
 
-    tmp_pdf = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+    # ---------------- HTML REPORT ----------------
+    html = f"""
+    <html>
+    <head>
+    <style>
 
-    doc = SimpleDocTemplate(tmp_pdf.name, pagesize=letter)
-    styles = getSampleStyleSheet()
+    body {{
+        font-family: Arial;
+        background: #f5f7fb;
+        padding: 20px;
+    }}
 
-    content = []
+    .header {{
+        background: linear-gradient(90deg,#0f2027,#2c5364);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+    }}
 
-    content.append(Paragraph("Insurance AI Report", styles['Title']))
-    content.append(Spacer(1,10))
+    .card {{
+        background: white;
+        padding: 15px;
+        border-radius: 12px;
+        margin-top: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }}
 
-    content.append(Paragraph("Customer Profile", styles['Heading2']))
-    content.append(Paragraph(str(X.to_dict()), styles['Normal']))
+    .row {{
+        display: flex;
+        justify-content: space-between;
+    }}
 
-    content.append(Spacer(1,10))
-    content.append(Paragraph(f"Estimated Cost: ₹{prediction:,.0f}", styles['Heading2']))
+    .badge {{
+        padding: 6px 12px;
+        border-radius: 8px;
+        color: white;
+        background: {risk_color};
+        font-weight: bold;
+    }}
 
-    content.append(Spacer(1,10))
-    content.append(Paragraph("Key Drivers", styles['Heading2']))
+    ul {{
+        padding-left: 20px;
+    }}
 
-    for e in explanations:
-        content.append(Paragraph(e, styles['Normal']))
+    </style>
+    </head>
 
-    content.append(Spacer(1,10))
-    content.append(Paragraph("Suggestions", styles['Heading2']))
+    <body>
 
-    if suggestions:
-        for s in suggestions:
-            content.append(Paragraph(s, styles['Normal']))
-    else:
-        content.append(Paragraph("No suggestions required", styles['Normal']))
+    <div class="header">
+        <h2>Medical Insurance Cost Predictor</h2>
+        <p>Smart Insights. Better Decisions.</p>
+    </div>
 
-    doc.build(content)
+    <div class="card">
+        <h3>Customer Profile</h3>
+        <p><b>Age:</b> {age} &nbsp; | 
+           <b>BMI:</b> {bmi} &nbsp; | 
+           <b>Children:</b> {children} &nbsp; | 
+           <b>Smoker:</b> {smoker} &nbsp; | 
+           <b>Gender:</b> {sex}
+        </p>
+    </div>
 
-    with open(tmp_pdf.name, "rb") as f:
-        st.download_button("Download Report", f, "report.pdf")
+    <div class="card">
+        <h3>Estimated Insurance Cost</h3>
+        <h2>₹{prediction:,.0f}</h2>
+        <p>Risk Level: <span class="badge">{risk}</span></p>
+    </div>
+
+    <div class="card">
+        <h3>Key Drivers</h3>
+        <ul>
+        {''.join([f"<li>{f}</li>" for f in factors])}
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>Personalized Suggestions</h3>
+        <ul>
+        {''.join([f"<li>{s}</li>" for s in suggestions])}
+        </ul>
+    </div>
+
+    </body>
+    </html>
+    """
+
+    # Save HTML
+    with open("report.html", "w") as f:
+        f.write(html)
+
+    # Convert to PDF
+    pdfkit.from_file("report.html", "final_report.pdf")
+
+    # Download
+    with open("final_report.pdf", "rb") as f:
+        st.download_button("📥 Download Report", f, "Medical_Insurance_Report.pdf")
