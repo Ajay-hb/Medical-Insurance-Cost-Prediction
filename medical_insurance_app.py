@@ -55,7 +55,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------- HEADER ----------------
-st.markdown('<div class="header">🧠 Mediacl Insurance Price Detector</div>', unsafe_allow_html=True)
+st.markdown('<div class="header"> Mediacl Insurance Price Detector</div>', unsafe_allow_html=True)
 
 # ---------------- INPUT ----------------
 st.subheader("📊 Enter Details")
